@@ -83,20 +83,20 @@ jobs:
         run: |
           cd kernel_workspace/kernel_platform
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
-          cd ./KernelSU
-          echo "⬇️ 下载KernelSU设置工具..."
-          curl -L -o sukisu_setup.bin https://github.com/Xiaomichael/OnePlus-Actions/raw/Build/script/sukisu_setup.bin
-          chmod +x sukisu_setup.bin
+          # cd ./KernelSU
+          # echo "⬇️ 下载KernelSU设置工具..."
+          # curl -L -o sukisu_setup.bin https://github.com/Xiaomichael/OnePlus-Actions/raw/Build/script/sukisu_setup.bin
+          # chmod +x sukisu_setup.bin
           
-          # 验证Makefile存在
-          if [ ! -f "kernel/Makefile" ]; then
-            echo "❌ 错误：缺少kernel/Makefile"
-            ls -la
-            exit 1
-          fi
+          # # 验证Makefile存在
+          # if [ ! -f "kernel/Makefile" ]; then
+          #   echo "❌ 错误：缺少kernel/Makefile"
+          #   ls -la
+          #   exit 1
+          # fi
           
-          ./sukisu_setup.bin
-          echo "✅ SukiSU Ultra配置完成"
+          # ./sukisu_setup.bin
+          # echo "✅ SukiSU Ultra配置完成"
         
       - name: Set up susfs
         run: |
