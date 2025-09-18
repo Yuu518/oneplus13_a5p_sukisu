@@ -18,7 +18,7 @@ on:
       enable_feature_y:
        description: "是否启用lz4kd"
        required: true
-       default: true
+       default: false
        type: boolean
       enable_feature_z:
        description: "是否添加风驰驱动"
@@ -355,7 +355,15 @@ jobs:
 
       - name: Build Kernel
         run: |
-          export KBUILD_BUILD_TIMESTAMP="${{ github.event.inputs.KERNEL_TIME }}"
+          INPUT_TIME="${{ github.event.inputs.KERNEL_TIME }}"
+          if [[ -n "$INPUT_TIME" && "$INPUT_TIME" != "F" && "$INPUT_TIME" != "f" ]]; then
+            DATESTR="$INPUT_TIME"
+            echo "Using input BUILD_TIME: $DATESTR"
+          else
+            DATESTR="$(TZ='UTC' date +'%a %b %d %T %Z %Y')"
+            echo "Using UTC time as fallback: $DATESTR"
+          fi
+          export KBUILD_BUILD_TIMESTAMP="${DATESTR}"
           export PATH="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
           export PATH="/usr/lib/ccache:$PATH"
           sudo apt install libelf-dev
