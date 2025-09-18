@@ -4,8 +4,8 @@ on:
     inputs:
       KERNEL_SUFFIX:
         description: '内核名称修改(可改中文和emoji)'
-        required: true
-        default: '-android15-oki-xiaoxiaow'
+        required: false
+        default: ''
       KERNEL_TIME:
        description: "内核构建日期更改(默认为原厂)"
        required: true
@@ -24,6 +24,16 @@ on:
        description: "是否添加风驰驱动"
        required: true
        default: true
+       type: boolean
+      enable_feature_p:
+       description: "是否添加 iptables 扩展支持"
+       required: false
+       default: false
+       type: boolean
+      enable_feature_n:
+       description: "是否添加 nftables 支持"
+       required: false
+       default: false
        type: boolean
        
 jobs:
@@ -83,20 +93,20 @@ jobs:
         run: |
           cd kernel_workspace/kernel_platform
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
-          cd ./KernelSU
-          echo "⬇️ 下载KernelSU设置工具..."
-          curl -L -o sukisu_setup.bin https://github.com/Xiaomichael/OnePlus-Actions/raw/Build/script/sukisu_setup.bin
-          chmod +x sukisu_setup.bin
+          # cd ./KernelSU
+          # echo "⬇️ 下载KernelSU设置工具..."
+          # curl -L -o sukisu_setup.bin https://github.com/Xiaomichael/OnePlus-Actions/raw/Build/script/sukisu_setup.bin
+          # chmod +x sukisu_setup.bin
           
           # 验证Makefile存在
-          if [ ! -f "kernel/Makefile" ]; then
-            echo "❌ 错误：缺少kernel/Makefile"
-            ls -la
-            exit 1
-          fi
+          # if [ ! -f "kernel/Makefile" ]; then
+          #   echo "❌ 错误：缺少kernel/Makefile"
+          #   ls -la
+          #   exit 1
+          # fi
           
-          ./sukisu_setup.bin
-          echo "✅ SukiSU Ultra配置完成"
+          # ./sukisu_setup.bin
+          # echo "✅ SukiSU Ultra配置完成"
         
       - name: Set up susfs
         run: |
@@ -245,14 +255,72 @@ jobs:
           echo "CONFIG_LOCALVERSION_AUTO=n" >> ./common/arch/arm64/configs/gki_defconfig
 
           # Add BBR
-          echo "CONFIG_TCP_CONG_ADVANCED=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_TCP_CONG_BBR=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_NET_SCH_FQ=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_TCP_CONG_BIC=n" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_TCP_CONG_CUBIC=n" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_TCP_CONG_WESTWOOD=n" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_TCP_CONG_HTCP=n" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_DEFAULT_TCP_CONG=bbr" >> ./common/arch/arm64/configs/gki_defconfig
+          # echo "CONFIG_TCP_CONG_ADVANCED=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # echo "CONFIG_TCP_CONG_BBR=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # echo "CONFIG_NET_SCH_FQ=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # echo "CONFIG_TCP_CONG_BIC=n" >> ./common/arch/arm64/configs/gki_defconfig
+          # echo "CONFIG_TCP_CONG_CUBIC=n" >> ./common/arch/arm64/configs/gki_defconfig
+          # echo "CONFIG_TCP_CONG_WESTWOOD=n" >> ./common/arch/arm64/configs/gki_defconfig
+          # echo "CONFIG_TCP_CONG_HTCP=n" >> ./common/arch/arm64/configs/gki_defconfig
+          # echo "CONFIG_DEFAULT_TCP_CONG=bbr" >> ./common/arch/arm64/configs/gki_defconfig
+
+      - name: Add iptables extensions
+        if: ${{inputs.enable_feature_p }}
+        run: |
+         cd kernel_workspace/kernel_platform
+         echo "CONFIG_BPF_STREAM_PARSER=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NETFILTER_XT_SET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_MAX=65534" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_BITMAP_IP=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_BITMAP_IPMAC=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_BITMAP_PORT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_IP=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_IPMARK=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_IPPORT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_IPPORTIP=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_IPPORTNET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_IPMAC=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_MAC=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_NETPORTNET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_NET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_NETNET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_NETPORT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_HASH_NETIFACE=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_SET_LIST_SET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP6_NF_NAT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP6_NF_TARGET_MASQUERADE=y" >> ./common/arch/arm64/configs/gki_defconfig
+
+      - name: Add nftables support
+        if: ${{inputs.enable_feature_n }}
+        run: |
+         cd kernel_workspace/kernel_platform
+         echo "CONFIG_NF_TABLES=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NF_TABLES_INET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NF_TABLES_NETDEV=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_SET=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_HASH=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_RBTREE=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_SET_RBTREE=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_SET_HASH=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_DYNAMIC_SETS=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_REJECT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_LOG=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_LIMIT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_CT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_CHAIN_ROUTE_IPV4=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_CHAIN_NAT_IPV4=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_CHAIN_ROUTE_IPV6=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_CHAIN_NAT_IPV6=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_NAT=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_MASQ=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_REDIR=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_TPROXY=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_QUEUE=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_COUNTER=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_META=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_NFT_FIB=y" >> ./common/arch/arm64/configs/gki_defconfig
           
           #Remove check_defconfig
           sudo sed -i 's/check_defconfig//' ./common/build.config.gki
