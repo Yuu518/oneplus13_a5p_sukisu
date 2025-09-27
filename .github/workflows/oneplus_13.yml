@@ -291,6 +291,12 @@ jobs:
          echo "CONFIG_IP_SET_LIST_SET=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_IP6_NF_NAT=y" >> ./common/arch/arm64/configs/gki_defconfig
          echo "CONFIG_IP6_NF_TARGET_MASQUERADE=y" >> ./common/arch/arm64/configs/gki_defconfig
+         
+         # ECN配置*
+         echo "CONFIG_IP_ECN=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_TCP_ECN=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IPV6_ECN=y" >> ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_IP_NF_TARGET_ECN=y" >> ./common/arch/arm64/configs/gki_defconfig
 
       - name: Add nftables support
         if: ${{inputs.enable_feature_n }}
@@ -381,7 +387,7 @@ jobs:
          
       - name: Make AnyKernel3
         run: |
-          git clone https://github.com/Xiaomichael/AnyKernel3.git --depth=1      
+          git clone https://github.com/Kernel-SU/AnyKernel3.git --depth=1      
           rm -rf ./AnyKernel3/.git
           rm -rf ./AnyKernel3/push.sh
           cp kernel_workspace/kernel_platform/common/out/arch/arm64/boot/Image ./AnyKernel3/
